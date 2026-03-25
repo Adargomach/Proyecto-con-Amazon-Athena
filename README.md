@@ -10,8 +10,10 @@
 <img width="1919" height="678" alt="image" src="https://github.com/user-attachments/assets/f19beebe-bc89-409a-a00e-f9dc08052281" />
 
 ## 2. Configuración de la base de datos en Athena
-Nos dirigimos a Amazon Athena. [cite_start]Para que Athena pueda leer el archivo CSV que está en S3, debemos crear una tabla externa[cite: 35]. 
+Antes de nada le debemos indicar donde queremos que se guarden los resultados.
+<img width="1549" height="699" alt="image" src="https://github.com/user-attachments/assets/3bd947cf-48bd-4585-8bff-3c34d1471185" />
 
+Nos dirigimos a Amazon Athena. [cite_start]Para que Athena pueda leer el archivo CSV que está en S3, debemos crear una tabla externa[cite: 35].
 **Código utilizado:**
 ```sql
 -- Creamos la base de datos si no existe
@@ -30,8 +32,19 @@ CREATE EXTERNAL TABLE IF NOT EXISTS egresados_fp (
 )
 -- Le decimos que es un CSV y cómo están separados los datos
 ROW FORMAT DELIMITED
-FIELDS TERMINATED BY ','
+FIELDS TERMINATED BY '\t'
 STORED AS TEXTFILE
 -- Aquí debes poner la ruta exacta de tu bucket de S3
-LOCATION 's3://datos-fp-canarias-grupoX/'
-TBLPROPERTIES ('skip.header.line.count'='1'); -- Ignoramos la primera fila si son los títulos
+LOCATION 's3://datos-egresados/'
+TBLPROPERTIES ('skip.header.line.count'='1'); -- Ignoramos la primera fila 
+```
+*Creamos la BBDD*
+<img width="1915" height="752" alt="image" src="https://github.com/user-attachments/assets/480e6bfb-faf3-487f-9ecc-129f2e9ddbc4" />
+
+*Creamos la tabla*
+<img width="1918" height="821" alt="image" src="https://github.com/user-attachments/assets/fe88aa0b-66e3-423d-99c0-c558da3ee9ec" />
+
+*Mostramos algunos datos par verificar que los lee bien*
+<img width="1919" height="856" alt="image" src="https://github.com/user-attachments/assets/39d8ed9b-a2ee-4e3e-b81e-a74add0999d7" />
+
+
