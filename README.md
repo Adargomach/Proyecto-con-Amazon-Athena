@@ -40,26 +40,29 @@ STORED AS TEXTFILE
 LOCATION 's3://datos-egresados/datos-origen/dataset-ISTAC-C00051A_000047-1_1/';
 TBLPROPERTIES ('skip.header.line.count'='1'); 
 ```
-*Creamos la BBDD*
+### Creamos la BBDD
 <img width="1915" height="752" alt="image" src="https://github.com/user-attachments/assets/480e6bfb-faf3-487f-9ecc-129f2e9ddbc4" />
 
-*Creamos la tabla*
+### Creamos la tabla
 <img width="1909" height="769" alt="image" src="https://github.com/user-attachments/assets/cd1bce42-61dd-4b4d-b22b-fa0591d6671b" />
 
 
-*Mostramos algunos datos par verificar que los lee bien*
+### Mostramos algunos datos par verificar que los lee bien
 <img width="1919" height="868" alt="image" src="https://github.com/user-attachments/assets/58b2bd69-0690-4dc3-aea8-27b554214fbe" />
 
 ## 3. Análisis de datos con la herramienta Athena
-*Familias Profesionales con más graduados*
+### Familias Profesionales con más graduados
+
 Esta consulta nos muestra qué titulaciones tienen un mayor volumen de egresados.
 <img width="1919" height="850" alt="image" src="https://github.com/user-attachments/assets/f4820951-1722-45a8-b22c-acd02f5fd6cc" />
 
-*Evolución Temporal por Curso*
+### Evolución Temporal por Curso
+
 Analizamos si el número de graduados en FP en Canarias ha crecido o disminuido a lo largo de los años.
 <img width="1919" height="837" alt="image" src="https://github.com/user-attachments/assets/834632b7-3f58-4277-9e24-153f91d64d8b" />
 
-*Comparativa por Sexo*
+### Comparativa por Sexo
+
 En esta consulta separamos y analizamos el número de graduados por género para cada familia profesional, eliminando los datos duplicados y los porcentajes para obtener una comparativa real de hombres y mujeres.
 <img width="1901" height="844" alt="image" src="https://github.com/user-attachments/assets/1d69b100-37a5-418d-8818-bdb4bc9fb5b6" />
 
