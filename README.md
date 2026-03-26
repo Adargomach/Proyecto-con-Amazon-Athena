@@ -14,58 +14,116 @@ Es recomendable crear una carpeta extra donde guardaremos los datos virgenes, ya
 Antes de nada le debemos indicar donde queremos que se guarden los resultados, por lo que entramos en Amazon Athena.
 Abrimos esta pestaña y le damos a `administrar`:
 <img width="1913" height="607" alt="image" src="https://github.com/user-attachments/assets/f413a460-86a7-4db7-9528-5ea55908c5a0" />
-Y le indicamos la ruta exacta de nuestro S3
+### Y le indicamos la ruta exacta de nuestro S3
 <img width="1549" height="699" alt="image" src="https://github.com/user-attachments/assets/3bd947cf-48bd-4585-8bff-3c34d1471185" />
 
-Nos dirigimos a Amazon Athena. Para que Athena pueda leer el archivo CSV que está en S3, debemos crear una tabla externa.
-**Código utilizado:**
-```sql
--- Creamos la base de datos
-CREATE DATABASE IF NOT EXISTS canarias_estadisticas;
--- Creamos la tabla 
-CREATE EXTERNAL TABLE egresados_fp (
-  curso STRING,
-  sexo STRING,
-  titulacion STRING,
-  modalidad_formacion STRING,
-  lugar_residencia STRING,
-  tiempo_egreso STRING,
-  relacion_actividad STRING,
-  medidas STRING,
-  total STRING
-)
-ROW FORMAT DELIMITED
-FIELDS TERMINATED BY '\t' 
-STORED AS TEXTFILE
-LOCATION 's3://datos-egresados/datos-origen/dataset-ISTAC-C00051A_000047-1_1/';
-TBLPROPERTIES ('skip.header.line.count'='1'); 
-```
-### Creamos la BBDD
+### Creamos la BBDD de la manera más sencilla 
 <img width="1915" height="752" alt="image" src="https://github.com/user-attachments/assets/480e6bfb-faf3-487f-9ecc-129f2e9ddbc4" />
 
-### Creamos la tabla
-<img width="1909" height="769" alt="image" src="https://github.com/user-attachments/assets/cd1bce42-61dd-4b4d-b22b-fa0591d6671b" />
+### Le damos a crear tabla a partir de los datos del S3.
+<img width="1919" height="462" alt="image" src="https://github.com/user-attachments/assets/649b77d1-bac7-4552-9ff4-1ca63a4c45ba" />
 
+### Le indicamos el nombre de la tabla que queremos crear y le decimos que la cree en la BBDD que ya habiamos creado antes.
+<img width="1918" height="560" alt="image" src="https://github.com/user-attachments/assets/ec737e39-8a3e-4180-8b3a-fec92f3fdfcd" />
 
-### Mostramos algunos datos par verificar que los lee bien
-<img width="1919" height="868" alt="image" src="https://github.com/user-attachments/assets/58b2bd69-0690-4dc3-aea8-27b554214fbe" />
+### Ponemos donde se encuentran los datos en nuestro S3
+<img width="1472" height="196" alt="image" src="https://github.com/user-attachments/assets/601e0edf-2bf8-4970-a8c4-3d58ccedff34" />
+
+### Cambiamos el formato del archivo para indicarle que es un .tsv
+<img width="1637" height="408" alt="image" src="https://github.com/user-attachments/assets/1203e79d-1286-457e-9b70-5de43003db76" />
+
+### Agregamos las columnas y el tipo
+<img width="846" height="480" alt="image" src="https://github.com/user-attachments/assets/3d353b3c-25db-471c-a578-dd6936357ce5" />
+
+### Revisamos por si fallamos en algo, si esta todo bien continuamos
+<img width="1919" height="856" alt="image" src="https://github.com/user-attachments/assets/54d7e5a1-98c5-4caa-9ca2-6b0f59a9e547" />
+
+### Si lo hemos hecho bien, nos aparecerá el código de nuestra tabla y ya le damos a crear la tabla.
+<img width="1919" height="834" alt="image" src="https://github.com/user-attachments/assets/ac22527b-6d8d-4fc1-807b-4bb20fa32b9e" />
+
+```
+CREATE EXTERNAL TABLE IF NOT EXISTS `canarias_estadisticas`.`ISTAC_egresados` (
+  `time_period` string,
+  `sexo` string,
+  `titulacion` string,
+  `modalidad_formacion` string,
+  `lugar_residencia` string,
+  `tiempo_egreso` string,
+  `relacion_actividad` string,
+  `medidas` string,
+  `attribute` string,
+  `attribute_value` string,
+  `attribute_value_code` string,
+  `territorio` string
+)
+ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe'
+WITH SERDEPROPERTIES ('field.delim' = '\t')
+STORED AS INPUTFORMAT 'org.apache.hadoop.mapred.TextInputFormat' OUTPUTFORMAT 'org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat'
+LOCATION 's3://datos-egresados/datos-origen/dataset-ISTAC-C00051A_000047-1_1/'
+TBLPROPERTIES ('skip.header.line.count'='1'); #esta linea la añadimos para que no se repitan los titulos de las columns
+```
+### Ejecutamos el script
+<img width="1917" height="801" alt="image" src="https://github.com/user-attachments/assets/f7e69505-da57-47c5-bbd7-f7265eb505f7" />
+
+### Hacemos un `select * ` para comprobar que efetivamente los datos están
+<img width="1914" height="843" alt="image" src="https://github.com/user-attachments/assets/96fdddaf-cf4a-47b3-b5a9-efd6101e80da" />
 
 ## 3. Análisis de datos con la herramienta Athena
-### Familias Profesionales con más graduados
+### ¿A qué se dedican los graduados?
 
-Esta consulta nos muestra qué titulaciones tienen un mayor volumen de egresados.
-<img width="1919" height="850" alt="image" src="https://github.com/user-attachments/assets/f4820951-1722-45a8-b22c-acd02f5fd6cc" />
+Esta consulta te permite saber cuántos de esos egresados han seguido estudiando, cuántos están trabajando o en otras situaciones
+<img width="1913" height="847" alt="image" src="https://github.com/user-attachments/assets/ec9bab46-be8a-49c7-bf8f-d8f500afd91d" />
 
-### Evolución Temporal por Curso
+```
+SELECT 
+  relacion_actividad, 
+  ROUND(SUM(TRY_CAST(attribute AS DOUBLE))) AS total_personas
+FROM istac_egresados
+WHERE medidas LIKE '%Egresados%' 
+  AND relacion_actividad NOT LIKE '%Total%' -- Quitamos el resumen
+  AND sexo NOT LIKE '%Total%'
+  AND titulacion NOT LIKE '%Total%'
+GROUP BY relacion_actividad
+ORDER BY total_personas DESC;
+```
 
-Analizamos si el número de graduados en FP en Canarias ha crecido o disminuido a lo largo de los años.
-<img width="1919" height="837" alt="image" src="https://github.com/user-attachments/assets/834632b7-3f58-4277-9e24-153f91d64d8b" />
+### ¿En qué momento se recogen los datos?
 
+Esta consulta nos permite ver cuántos datos hay de gente recién graduada vs gente que se graduó hace 5 años
+<img width="1919" height="875" alt="image" src="https://github.com/user-attachments/assets/0f5255c6-1998-4c8b-8eb5-897a9cb3082c" />
+```
+SELECT 
+  tiempo_egreso, 
+  ROUND(SUM(TRY_CAST(attribute AS DOUBLE))) AS volumen_datos
+FROM istac_egresados
+WHERE medidas LIKE '%Egresados%' 
+  AND tiempo_egreso NOT LIKE '%Total%'
+  AND sexo NOT LIKE '%Total%'
+GROUP BY tiempo_egreso
+ORDER BY volumen_datos DESC;
+```
 ### Comparativa por Sexo
 
 En esta consulta separamos y analizamos el número de graduados por género para cada familia profesional, eliminando los datos duplicados y los porcentajes para obtener una comparativa real de hombres y mujeres.
-<img width="1901" height="844" alt="image" src="https://github.com/user-attachments/assets/1d69b100-37a5-418d-8818-bdb4bc9fb5b6" />
+<img width="1913" height="847" alt="image" src="https://github.com/user-attachments/assets/1e51f742-1a6e-4c5f-9c37-5663fc0b69ec" />
+```
+SELECT 
+  titulacion AS familia_profesional,
+  ROUND(SUM(CASE WHEN sexo LIKE '%Hombres%' THEN TRY_CAST(attribute AS DOUBLE) ELSE 0 END)) AS total_hombres,
+  ROUND(SUM(CASE WHEN sexo LIKE '%Mujeres%' THEN TRY_CAST(attribute AS DOUBLE) ELSE 0 END)) AS total_mujeres
+FROM istac_egresados
+WHERE medidas LIKE '%Egresados%' 
+  AND titulacion NOT LIKE '%Total%' 
+  AND sexo NOT LIKE '%Total%'
+  AND sexo NOT LIKE '%Ambos%'
+GROUP BY titulacion
+ORDER BY (total_hombres + total_mujeres) DESC;
+```
+### Revisión de los resultados
+<img width="1918" height="843" alt="image" src="https://github.com/user-attachments/assets/c277af15-d3c8-4edd-afd7-46f090be82fc" />
 
-
+### Comprobamos que las modalidades son Presencial y No presencial, aunque aparezca total
+"El archivo original contiene filas agregadas (Totales) para facilitar la lectura manual, pero para el análisis en Athena las he filtrado para evitar duplicidades y asegurar la integridad de los cálculos".
+<img width="1919" height="765" alt="image" src="https://github.com/user-attachments/assets/adf9ab23-d8a1-47cb-8e1b-a333a622c21b" />
 
 
