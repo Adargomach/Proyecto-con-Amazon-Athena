@@ -80,7 +80,7 @@ SELECT
   ROUND(SUM(TRY_CAST(attribute AS DOUBLE))) AS total_personas
 FROM istac_egresados
 WHERE medidas LIKE '%Egresados%' 
-  AND relacion_actividad NOT LIKE '%Total%' -- Quitamos el resumen
+  AND relacion_actividad NOT LIKE '%Total%' 
   AND sexo NOT LIKE '%Total%'
   AND titulacion NOT LIKE '%Total%'
 GROUP BY relacion_actividad
